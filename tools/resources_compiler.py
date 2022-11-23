@@ -144,7 +144,7 @@ class ResourceTable(object):
     in_chr = ''.join(map(chr, range(256)))
     out_chr = [ord('_')] * 256
     # Tolerated characters.
-    for i in string.uppercase + string.lowercase + string.digits:
+    for i in string.ascii_uppercase + string.ascii_lowercase + string.digits:
       out_chr[ord(i)] = ord(i.lower())
 
     # Rewritten characters.
@@ -153,9 +153,9 @@ class ResourceTable(object):
     for rewrite in zip(in_rewritten, out_rewritten):
       out_chr[ord(rewrite[0])] = ord(rewrite[1])
 
-    table = string.maketrans(in_chr, ''.join(map(chr, out_chr)))
     bad_chars = '\t\n\r-:()[]"\',;'
-    self._MakeIdentifier = lambda s:s.translate(table, bad_chars)
+    table = str.maketrans(in_chr, ''.join(map(chr, out_chr)), bad_chars)
+    self._MakeIdentifier = lambda s:s.translate(table)
   
   def DeclareEntries(self, f):
     if self.python_type != str:
@@ -228,7 +228,7 @@ class ResourceLibrary(object):
   
   def GenerateHeader(self):
     root = self._root
-    f = file(os.path.join(root.target, 'resources.h'), 'wb')
+    f = open(os.path.join(root.target, 'resources.h'), 'w')
     # Write header and header guard
     header_guard = root.target.replace(os.path.sep, '_').upper()
     header_guard = '%s_RESOURCES_H_' % header_guard
@@ -249,7 +249,7 @@ class ResourceLibrary(object):
   def GenerateCc(self):
     root = self._root
     file_name = os.path.join(self._root.target, 'resources.cc')
-    f = file(file_name, 'wb')
+    f = open(file_name, 'w')
     f.write(self._root.header + '\n\n')
     f.write('#include "%s"\n' % file_name.replace('.cc', '.h'))
     self._OpenNamespace(f)
